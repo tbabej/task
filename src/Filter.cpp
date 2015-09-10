@@ -75,11 +75,15 @@ void Filter::subset (const std::vector <Task>& input, std::vector <Task>& output
   _startCount = (int) input.size ();
 
   context.cli2.prepareFilter ();
+  std::stringstream filterSpec;
 
   std::vector <std::pair <std::string, Lexer::Type>> precompiled;
   for (auto& a : context.cli2._args)
     if (a.hasTag ("FILTER"))
+    {
       precompiled.push_back (std::pair <std::string, Lexer::Type> (a.getToken (), a._lextype));
+      filterSpec << a.attribute ("raw") << " ";
+    }
 
   if (precompiled.size ())
   {
@@ -110,6 +114,7 @@ void Filter::subset (const std::vector <Task>& input, std::vector <Task>& output
 
   _endCount = (int) output.size ();
   context.debug (format ("Filtered {1} tasks --> {2} tasks [list subset]", _startCount, _endCount));
+  context.debug (format ("Filter used: {1}", filterSpec.str ()));
   context.timer_filter.stop ();
 }
 
@@ -120,11 +125,15 @@ void Filter::subset (std::vector <Task>& output)
   context.timer_filter.start ();
 
   context.cli2.prepareFilter ();
+  std::stringstream filterSpec;
 
   std::vector <std::pair <std::string, Lexer::Type>> precompiled;
   for (auto& a : context.cli2._args)
     if (a.hasTag ("FILTER"))
+    {
       precompiled.push_back (std::pair <std::string, Lexer::Type> (a.getToken (), a._lextype));
+      filterSpec << a.attribute ("raw") << " ";
+    }
 
   // Shortcut indicates that only pending.data needs to be loaded.
   bool shortcut = false;
@@ -195,6 +204,7 @@ void Filter::subset (std::vector <Task>& output)
 
   _endCount = (int) output.size ();
   context.debug (format ("Filtered {1} tasks --> {2} tasks [{3}]", _startCount, _endCount, (shortcut ? "pending only" : "all tasks")));
+  context.debug (format ("Filter used: {1}", filterSpec.str ()));
   context.timer_filter.stop ();
 }
 
