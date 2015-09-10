@@ -535,6 +535,10 @@ void CLI2::analyze ()
   handleArg0 ();
   lexArguments ();
 
+  // Mark pre-expansion args
+  for (auto& a : _args)
+      a.tag ("ORIGINAL");
+
   // Process _args.
   aliasExpansion ();
   if (! findCommand ())
