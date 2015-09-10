@@ -43,7 +43,7 @@ CmdExec::CmdExec ()
   _displays_id           = false;
   _needs_gc              = false;
   _uses_context          = false;
-  _accepts_filter        = false;
+  _accepts_filter        = true;
   _accepts_modifications = false;
   _accepts_miscellaneous = true;
   _category              = Command::Category::misc;
@@ -52,8 +52,32 @@ CmdExec::CmdExec ()
 ////////////////////////////////////////////////////////////////////////////////
 int CmdExec::execute (std::string& output)
 {
+  std::string args;
+  std::string filter;
   std::string command_line;
+
+  std::vector <std::string> filterWords;
+  std::vector <std::string> argsWords;
+
+  for (auto& a : context.cli2._args)
+    if (a.hasTag ("ORIGINAL"))
+    {
+      if (a.hasTag ("FILTER"))
+        filterWords.push_back (a.attribute ("raw"));
+      else if (a.hasTag ("MISCELLANEOUS"))
+        argsWords.push_back (a.attribute ("raw"));
+    }
+
+  join (args, " ", argsWords);
+  join (filter, " ", filterWords);
   join (command_line, " ", context.cli2.getWords ());
+
+  std::string filterEnv = std::string("TASK_FILTER=") + filter;
+  std::string argsEnv = std::string("TASK_ARGS=") + args;
+
+  putenv(const_cast<char*> (filterEnv.c_str ()));
+  putenv(const_cast<char*> (argsEnv.c_str ()));
+
   return system (command_line.c_str ());
 }
 
