@@ -35,6 +35,8 @@
 #include <util.h>
 #include <text.h>
 
+#include <CurrentContext.h>
+
 extern Context context;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,8 +191,12 @@ void CmdContext::deleteContext (const std::vector <std::string>& words, std::str
     auto confirmation = context.config.getBoolean ("confirmation");
     auto rc = CmdConfig::unsetConfigVariable(name, confirmation);
 
+    // We are not using the environment variable override here,
+    // but the actual configured value
+    std::string currentContext = context.config.get ("context");
+
     // If the currently set context was deleted, unset it
-    if (context.config.get ("context") == words[1])
+    if (currentContext == words[1])
       CmdConfig::unsetConfigVariable("context", false);
 
     // Output feedback
@@ -230,7 +236,7 @@ void CmdContext::listContexts (std::stringstream& out)
       view.colorHeader (label);
     }
 
-    std::string activeContext = context.config.get ("context");
+    std::string activeContext = getCurrentContext (context);
 
     for (auto& userContext : contexts)
     {
@@ -292,7 +298,7 @@ void CmdContext::setContext (const std::vector <std::string>& words, std::string
 //
 void CmdContext::showContext (std::stringstream& out)
 {
-  auto currentContext = context.config.get ("context");
+  auto currentContext = getCurrentContext (context);
 
   if (currentContext == "")
     out << STRING_CMD_CONTEXT_SHOW_EMPT << "\n";

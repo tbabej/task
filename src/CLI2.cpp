@@ -36,6 +36,8 @@
 #include <util.h>
 #include <i18n.h>
 
+#include <CurrentContext.h>
+
 extern Context context;
 
 // Overridden by rc.abbreviation.minimum.
@@ -568,7 +570,7 @@ void CLI2::addContextFilter ()
     return;
 
   // Detect if any context is set, and bail out if not
-  std::string contextName = context.config.get ("context");
+  std::string contextName = getCurrentContext (context);
   if (contextName == "")
   {
     context.debug ("No context.");
